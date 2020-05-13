@@ -29,7 +29,7 @@ library(RColorBrewer)
 n <- 60
 qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
 col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-pie(rep(1,n), col=sample(col_vector, n))
+#pie(rep(1,n), col=sample(col_vector, n))
 
 names(col_vector)<-levels(viz_leg$Clusters)
 colScale <- scale_colour_manual(name = "Clusters",values = col_vector)
@@ -54,7 +54,7 @@ plot_leg_clust = ggplot() +
   # set lables
   labs(title = "Clusters and lable of choice plotted",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
 plot_leg_clust
-
+#dev.off()
 
 #two plots beside each other
 par(mfrow=c(1,2),mai=c(0.7,0.7,0.5,0.5))
