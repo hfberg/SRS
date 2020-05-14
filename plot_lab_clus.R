@@ -8,7 +8,7 @@ customer_lables<-customer_lables_backup
 # load excel sheet with customaer lables placed in theworking directory.
 #customer_lables = read.xlsx(file = "NKI_legends.xlsx",1)
 
-leg = 6 # column number for the legend you want to plot.
+leg =43 # column number for the legend you want to plot.
 PC_x = 1 # the number of the PC you want to plot on the x-axis
 PC_y = 4 # the number of the PC you want to plot on the y-axis
 
@@ -42,13 +42,13 @@ colScale <- scale_colour_manual(name = "Clusters",values = col_vector)
 plot_leg_clust = ggplot() +
   
   # scatter plot
-  geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,4]), show.legend = T,inherit.aes = FALSE) +
+  geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,4])) +
   
   # reset color scale
   new_scale_color() +
   
   #plot ellipses
-  stat_ellipse(show.legend = T, aes(x = viz_leg[,1], y= viz_leg[,2], color = as.factor(viz_leg[,3])), data = viz_leg,inherit.aes = FALSE) +
+  stat_ellipse(aes(x = viz_leg[,1], y= viz_leg[,2], color = as.factor(viz_leg[,3])), data = viz_leg) +
   colScale +
 
   
@@ -72,10 +72,16 @@ library(cowplot)
 p1 <- ggplot(data=counts_leg, aes(x=counts_leg[,2], y=counts_leg[,3], fill=counts_leg[,1])) +
   geom_bar(stat="identity", position="fill") +
   geom_text(aes(label=percent(x=counts_leg[,3])), vjust=1.6, color="black",
-            position = position_fill(0.9), size=3)
+            position = position_fill(0.9), size=3) +
+  labs(title = "Percentages of total lable for each cluster", x = colnames(viz_leg[3]), y = colnames(viz_leg[4]), fill = colnames(viz_leg[4]))
+
 
 p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,3]), show.legend = T) +
-  colScale
+  colScale +
+  labs(title = "Clustering based on PC of choice",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
+
+  
+# set lables
 
 p <- plot_grid(p1, p2, labels = c(colnames(viz_leg[4]), colnames(viz_leg[3])))
 p
