@@ -3,6 +3,8 @@ library(ggplot2)
 library(RColorBrewer)
 library(ggnewscale)
 
+customer_lables<-customer_lables_backup
+
 # load excel sheet with customaer lables placed in theworking directory.
 #customer_lables = read.xlsx(file = "NKI_legends.xlsx",1)
 
@@ -41,7 +43,6 @@ plot_leg_clust = ggplot() +
   
   # scatter plot
   geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,4]), show.legend = T,inherit.aes = FALSE) +
-  scale_color_brewer(name = colnames(viz_leg[4]),palette="Set3") +
   
   # reset color scale
   new_scale_color() +
@@ -49,25 +50,33 @@ plot_leg_clust = ggplot() +
   #plot ellipses
   stat_ellipse(show.legend = T, aes(x = viz_leg[,1], y= viz_leg[,2], color = as.factor(viz_leg[,3])), data = viz_leg,inherit.aes = FALSE) +
   colScale +
-  #scale_color_brewer(name = colnames(viz_leg[3]), palette="Paired") +
+
   
   # set lables
   labs(title = "Clusters and lable of choice plotted",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
 plot_leg_clust
 #dev.off()
+#save_plot("plot1.pdf",plot_leg_clust)
+
+#prepare for barplot
+counts_leg<-(table(viz_leg[,4], viz_leg[,3]))
+for (i in 1:nrow(counts_leg))
+  {counts_leg[i,]<-round(counts_leg[i,]/sum(counts_leg[i,]),3)
+  }
+counts_leg<-as.data.frame(counts_leg)
 
 #two plots beside each other
-par(mfrow=c(1,2),mai=c(0.7,0.7,0.5,0.5))
-counts <- table(viz_leg[,4], viz_leg[,3])
 
-#barplot
-barplot(counts,  cex.names = 1,main=colnames(viz_leg[4]), col= as.factor(rownames(counts)),
-        beside=TRUE,xlab="")
-legend("topleft", legend = rownames(counts), fill =as.factor(rownames(counts)), x.intersp=0.3, horiz=F,cex=0.5)
-title(xlab="Cluster index", line=2, cex.lab=0.8)
+library(cowplot)
 
-#scatter of clusters
-plot(x=viz_leg[,1], y=viz_leg[,2],xlab="",ylab="",col=as.factor(viz_leg[,3]),main= "Clusters", pch=16)
-legend("topright",legend = colnames(counts),x.intersp=0.3, fill =as.factor(colnames(counts)),  horiz=F,cex=0.5)
-title(ylab=colnames(viz_leg[2]), line=2, cex.lab=0.8)
-title(xlab=colnames(viz_leg[1]), line=2, cex.lab=0.8)
+p1 <- ggplot(data=counts_leg, aes(x=counts_leg[,2], y=counts_leg[,3], fill=counts_leg[,1])) +
+  geom_bar(stat="identity", position="fill") +
+  geom_text(aes(label=percent(x=counts_leg[,3])), vjust=1.6, color="black",
+            position = position_fill(0.9), size=3)
+
+p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,3]), show.legend = T) +
+  colScale
+
+p <- plot_grid(p1, p2, labels = c(colnames(viz_leg[4]), colnames(viz_leg[3])))
+p
+save_plot("plot2.pdf",p, ncol = 2)
