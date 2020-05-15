@@ -3,17 +3,17 @@ library(ggplot2)
 library(RColorBrewer)
 library(ggnewscale)
 
-customer_lables<-customer_lables_backup
+customer_labels<-customer_labels_backup
 
-# load excel sheet with customaer lables placed in theworking directory.
-#customer_lables = read.xlsx(file = "NKI_legends.xlsx",1)
+# load excel sheet with customaer labels placed in theworking directory.
+#customer_labels = read.xlsx(file = "NKI_legends.xlsx",1)
 
 leg =43 # column number for the legend you want to plot.
 PC_x = 1 # the number of the PC you want to plot on the x-axis
 PC_y = 4 # the number of the PC you want to plot on the y-axis
 
 
-# Prepare a data frame with PCs to plot, clusters and lables
+# Prepare a data frame with PCs to plot, clusters and labels
 viz_leg<-as.data.frame(cbind(PCAs[,PC_x],PCAs[,PC_y]))
 
 # re-cluster based on new PCs?
@@ -22,10 +22,10 @@ k=18
 k_for_plot <- kmeans(viz_leg, k, nstart=25, iter.max=1000)
 viz_leg<-as.data.frame(cbind(viz_leg,k_for_plot[["cluster"]]))
 
-viz_leg<-cbind(viz_leg,customer_lables[,leg])
+viz_leg<-cbind(viz_leg,customer_labels[,leg])
 viz_leg[,3]<-as.factor(viz_leg[,3])
 viz_leg[,4]<-as.factor(viz_leg[,4])
-colnames(viz_leg)<-c(colnames(PCAs[PC_x]),colnames(PCAs[PC_y]),"Clusters",colnames(customer_lables[leg]))
+colnames(viz_leg)<-c(colnames(PCAs[PC_x]),colnames(PCAs[PC_y]),"Clusters",colnames(customer_labels[leg]))
 
 
 ### create and map colors to clusters
@@ -55,14 +55,17 @@ plot_leg_clust = ggplot() +
   colScale +
 
   
-  # set lables
-  labs(title = "Clusters and lable of choice plotted",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
+  # set labels
+  labs(title = "Clusters and label of choice plotted",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
 plot_leg_clust
 #dev.off()
 save_plot("plot1.pdf",plot_leg_clust)
 
 #prepare for barplot
+counts<-as.data.frame(table(viz_leg[,4], viz_leg[,3])))
+
 counts_leg<-(table(viz_leg[,4], viz_leg[,3]))
+
 for (i in 1:nrow(counts_leg))
   {counts_leg[i,]<-round(counts_leg[i,]/sum(counts_leg[i,]),3)
   }
@@ -72,11 +75,11 @@ counts_leg<-as.data.frame(counts_leg)
 
 library(cowplot)
 
-p1 <- ggplot(data=counts_leg, aes(x=counts_leg[,2], y=counts_leg[,3], fill=counts_leg[,1])) +
+p1 <- ggplot(data=counts_leg, aes(x=counts_leg[,2], y=counts[,3], fill=counts_leg[,1])) +
   geom_bar(stat="identity", position="fill") +
   geom_text(aes(label=percent(x=counts_leg[,3])), vjust=1.6, color="black",
             position = position_fill(0.9), size=3) +
-  labs(title = "Percentages of total lable for each cluster",x = colnames(viz_leg[3]), y = "", fill = colnames(viz_leg[4]))
+  labs(title = "Percentages of total label for each cluster",x = colnames(viz_leg[3]), y = "", fill = colnames(viz_leg[4]))
 
 
 p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,3]), show.legend = T) +
@@ -84,7 +87,7 @@ p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],
   labs(title = "Clustering based on PC of choice",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
   
   
-# set lables
+# set labels
 
 p <- plot_grid(p1, p2)
 p
@@ -106,11 +109,11 @@ if (save_results == "y"){
   
   
   
-  filen1<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]))
-  pdf(file = filen1, paper = "a4r")
-  plot_leg_clust
-  dev.off()
+  #filen1<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]),".pdf")
   
+  #pdf(file = "test.pdf", paper="a4")
+  #plot(plot_leg_clust)
+  #dev.off()
   
   filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]), " barplot.pdf")
   save_plot(filen2,p,ncol=2)
