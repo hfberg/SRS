@@ -17,7 +17,9 @@ PC_y = 4 # the number of the PC you want to plot on the y-axis
 viz_leg<-as.data.frame(cbind(PCAs[,PC_x],PCAs[,PC_y]))
 
 # re-cluster based on new PCs?
-k_for_plot <- kmeans(viz_leg, 18, nstart=25, iter.max=1000)
+# number of clusters
+k=18
+k_for_plot <- kmeans(viz_leg, k, nstart=25, iter.max=1000)
 viz_leg<-as.data.frame(cbind(viz_leg,k_for_plot[["cluster"]]))
 
 viz_leg<-cbind(viz_leg,customer_lables[,leg])
@@ -43,6 +45,7 @@ plot_leg_clust = ggplot() +
   
   # scatter plot
   geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,4])) +
+  labs(color=colnames(viz_leg[4])) +
   
   # reset color scale
   new_scale_color() +
@@ -56,7 +59,7 @@ plot_leg_clust = ggplot() +
   labs(title = "Clusters and lable of choice plotted",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
 plot_leg_clust
 #dev.off()
-#save_plot("plot1.pdf",plot_leg_clust)
+save_plot("plot1.pdf",plot_leg_clust)
 
 #prepare for barplot
 counts_leg<-(table(viz_leg[,4], viz_leg[,3]))
@@ -73,16 +76,43 @@ p1 <- ggplot(data=counts_leg, aes(x=counts_leg[,2], y=counts_leg[,3], fill=count
   geom_bar(stat="identity", position="fill") +
   geom_text(aes(label=percent(x=counts_leg[,3])), vjust=1.6, color="black",
             position = position_fill(0.9), size=3) +
-  labs(title = "Percentages of total lable for each cluster", x = colnames(viz_leg[3]), y = colnames(viz_leg[4]), fill = colnames(viz_leg[4]))
+  labs(title = "Percentages of total lable for each cluster",x = colnames(viz_leg[3]), y = "", fill = colnames(viz_leg[4]))
 
 
 p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg[,1], y=viz_leg[,2],color = viz_leg[,3]), show.legend = T) +
-  colScale +
+  colScale + guides(col = guide_legend(nrow = floor(k/2))) +
   labs(title = "Clustering based on PC of choice",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
-
+  
   
 # set lables
 
-p <- plot_grid(p1, p2, labels = c(colnames(viz_leg[4]), colnames(viz_leg[3])))
+p <- plot_grid(p1, p2)
 p
+
 save_plot("plot2.pdf",p, ncol = 2)
+
+
+
+save_results <- "y"
+
+
+if (save_results == "y"){
+  
+  result_path<-paste0("C:/Users/habe/Documents/NKI_clustering/Resultat NKI skala 1-10")
+  sub_dir<-paste0("/Klustring PC", PC_x, " vs PC", PC_y)
+  
+  #if a folder for the PCs doesn't exist, create one.
+  dir.create(file.path(result_path, sub_dir), showWarnings = FALSE)
+  
+  
+  
+  filen1<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]))
+  pdf(file = filen1, paper = "a4r")
+  plot_leg_clust
+  dev.off()
+  
+  
+  filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]), " barplot.pdf")
+  save_plot(filen2,p,ncol=2)
+  }
+
