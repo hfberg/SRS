@@ -7,9 +7,9 @@
 # # Modified by Hanna Berg 23-04-2020
 # 
 # #Library for formatting the code.
-# library(bannerCommenter)
+library(bannerCommenter)
 # 
-# banner("Import and check data", emph = TRUE)
+#banner("Import and check data", emph = TRUE)
 # 
 # #Load library to import excel file
 # library(xlsx)
@@ -87,6 +87,7 @@
 # plot(sd_in_raw, xlab= "Question index")
 # 
 #  ######################### Start here for ready made data
+raw<-raw_imputation_backup
 
 banner("Correlation matrix", emph = TRUE)
 
@@ -118,9 +119,9 @@ variable_Q<-rot_loading[["loadings"]]^2
 rm_rows = 0
 thr = 0.09
 for (i in 1:nrow(variable_Q)){
-  if (sum(variable_Q[i,])<thr){
-    rm_rows<-append(rm_rows,i)
-  }
+if (sum(variable_Q[i,])<thr){
+rm_rows<-append(rm_rows,i)
+}
 }
 
 #remove rows with a sum below the threshold
@@ -144,30 +145,39 @@ no_of_PCs<- 5
 PCAs<-data.frame(pr_out$x[,1:no_of_PCs])
 colnames(PCAs)<-c(PC1_axis,PC2_axis,PC3_axis, PC4_axis, PC5_axis)
 
+# Plot biplot
+library(ggbiplot)
+customer_labels<-customer_labels_backup
+ggbiplot(pr_out, choices = c(1,2), ellipse = T, groups = as.factor(customer_labels[,7]))
+
+# Are the variables in the wrong direction? Multiply with -1
+
+pr_out$x <- (pr_out$x)*-1
+
 
 banner("Clustering with K-means", emph = TRUE)
 # Determine number of clusters
 predict_no_clust <- (nrow(raw)-1)*sum(apply(raw,2,var))
 for (i in 2:15) predict_no_clust[i] <- sum(kmeans(raw,
-                                     centers=i)$withinss)
+                                 centers=i)$withinss)
 plot(1:15, predict_no_clust, type="b", xlab="Number of Clusters",
-     ylab="Within groups sum of squares")
+ ylab="Within groups sum of squares")
 
 # K-means clustering
 # Determine number of clusters from scree plot. 
 # Where does the elbow occur?
 # Apply k-means with k=elbow number
-k <- kmeans(PCAs, 12, nstart=25, iter.max=1000)
-library(RColorBrewer)
-library(scales)
-palette(alpha(brewer.pal(9,'Set1'), 0.5))
-plot(PCAs, col=k$clust, pch=16)
+# k <- kmeans(PCAs, 12, nstart=25, iter.max=1000)
+# library(RColorBrewer)
+# library(scales)
+# palette(alpha(brewer.pal(9,'Set1'), 0.5))
+# plot(PCAs, col=k$clust, pch=16)
 
-# Plot in 3D and save to disk
-library("rgl")
-
-
-plot3d(PCAs, col=k$clust, pch=16)
+# # Plot in 3D and save to disk
+# library("rgl")
+# 
+# 
+# plot3d(PCAs, col=k$clust, pch=16)
 
 # # Generates a non interactive plot called "plot"
 # snapshot3d("plot.png")
@@ -183,16 +193,18 @@ plot3d(PCAs, col=k$clust, pch=16)
 # 
 # 
 # 
-# banner("Lable customers", emph = TRUE)
+# banner("label customers", emph = TRUE)
 # 
-# #Load lables
-# customer_lables = read.xlsx(file = "NKI_legends.xlsx",1)
+# #Load labels
+# customer_labels = read.xlsx(file = "NKI_legends.xlsx",1)
 # 
-# plot(PCAs[,1:2], col = customer_lables[,4], pch=16)
-# legend("topright",legend = unique(customer_lables[,4]),  fill = c("blue", "red") )
+# plot(PCAs[,1:2], col = customer_labels[,4], pch=16)
+# legend("topright",legend = unique(customer_labels[,4]),  fill = c("blue", "red") )
 # 
 # ## With ggplot
-# PCAs_t3<-cbind(PCAs_t,customer_lables[,3])
+# PCAs_t3<-cbind(PCAs_t,customer_labels[,3])
 # 
 # # A basic scatterplot with color depending on Species
 # ggplot(PCAs_t3[,1:2], aes(x=PCAs_t3[,1], y=PCAs_t3[,2], color=PCAs_t3[,3])) + geom_point(size=1) 
+
+
