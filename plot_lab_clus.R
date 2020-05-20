@@ -1,4 +1,4 @@
-      # load ggplot2
+      # load necessary libraries
       library(ggplot2)
       library(RColorBrewer)
       library(ggnewscale)
@@ -8,7 +8,7 @@
       # load excel sheet with customaer labels placed in theworking directory.
       #customer_labels = read.xlsx(file = "NKI_legends.xlsx",1)
       
-      leg = 1 # column number for the legend you want to plot.
+      leg = 6 # column number for the legend you want to plot.
       PC_x = 1 # the number of the PC you want to plot on the x-axis
       PC_y = 2 # the number of the PC you want to plot on the y-axis
       
@@ -113,16 +113,16 @@
          dir.create(file.path(result_path, sub_dir), showWarnings = FALSE)
       
          
-         filen1<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]),".pdf")
+         filen1<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4])," ",k, " kluster.pdf")
          
          
          if (file.exists(filen1)){
            file.remove(filen1)}
         
-         save_plot(filen1,plot_leg_clust, base_asp = 3)
+         save_plot(filen1,plot_leg_clust, base_asp = 2.5)
          
          
-        filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4]), " barplot.pdf")
+        filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg[4])," ", k, " kluster, barplot.pdf")
         
         
         if (file.exists(filen2)){
