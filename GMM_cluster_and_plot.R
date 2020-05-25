@@ -12,9 +12,10 @@ library(mclust)
 leg = 6 # column number for the legend you want to plot.
 PC_x = 1 # the number of the PC you want to plot on the x-axis
 PC_y = 2 # the number of the PC you want to plot on the y-axis
+k = 3
 
 
-x =as.matrix(cbind(PCAs[,PC_x],PCAs[,PC_y]))
+x =as.matrix(cbind(PCs[,PC_x],PCs[,PC_y]))
 
 # Select 4 continuous variables and look for three distinct groups.
 #mcl.model <- Mclust(x,4, modelNames = c("VEI"))
@@ -32,7 +33,7 @@ plot(mcl.model, what = "uncertainty", main = "Mclust Classification")
 ## plot
 
 viz_leg_GMM <- data.frame(x,as.factor(mcl.model$classification),customer_labels[,leg])
-colnames(viz_leg_GMM)<-c(colnames(PCAs[PC_x]),colnames(PCAs[PC_y]),"Clusters",colnames(customer_labels[leg]))
+colnames(viz_leg_GMM)<-c(colnames(PCs[PC_x]),colnames(PCs[PC_y]),"Clusters",colnames(customer_labels[leg]))
 
 
 counts_GMM<-as.data.frame(table(viz_leg_GMM[,4], viz_leg_GMM[,3]))
@@ -75,4 +76,27 @@ p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg_GMM[,1], y=viz_leg_
 
 p <- plot_grid(p1, p2)
 p
+
+save_results <- "y"
+
+
+if (save_results == "y"){
+  
+  result_path<-paste0("C:/Users/habe/Documents/NKI_clustering/Resultat NKI skala 1-10")
+  sub_dir<-paste0("/GMM")
+  
+  #if a folder for the PCs doesn't exist, create one.
+  dir.create(file.path(result_path, sub_dir), showWarnings = FALSE)
+  
+  
+  
+  filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg_GMM[4])," ", k, " kluster, barplot.pdf")
+  
+  
+  if (file.exists(filen2)){
+    file.remove(filen2)}  
+  
+  
+  save_plot(filen2,p,ncol=2)
+}
 

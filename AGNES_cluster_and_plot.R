@@ -3,9 +3,10 @@
 leg = 6 # column number for the legend you want to plot.
 PC_x = 1 # the number of the PC you want to plot on the x-axis
 PC_y = 2 # the number of the PC you want to plot on the y-axis
+k = 3
 
 
-x =as.matrix(cbind(PCAs[,PC_x],PCAs[,PC_y]))
+x =as.matrix(cbind(PCs[,PC_x],PCs[,PC_y]))
 
 
 # Dissimilarity matrix
@@ -15,7 +16,7 @@ hc1 <- hclust(d, method = "complete" )
 # Plot the obtained dendrogram
 plot(hc1, cex = 0.6, hang = -1)
 
-clust <- cutree(hc1, k = 5)
+clust <- cutree(hc1, k)
 
 
 
@@ -23,7 +24,7 @@ clust <- cutree(hc1, k = 5)
 ## plot
 
 viz_leg_AGNES <- data.frame(x,as.factor(clust),customer_labels[,leg])
-colnames(viz_leg_AGNES)<-c(colnames(PCAs[PC_x]),colnames(PCAs[PC_y]),"Clusters",colnames(customer_labels[leg]))
+colnames(viz_leg_AGNES)<-c(colnames(PCs[PC_x]),colnames(PCs[PC_y]),"Clusters",colnames(customer_labels[leg]))
 
 
 counts_AGNES<-as.data.frame(table(viz_leg_AGNES[,4], viz_leg_AGNES[,3]))
@@ -66,3 +67,26 @@ p2<- ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg_AGNES[,1], y=viz_le
 
 p <- plot_grid(p1, p2)
 p
+
+save_results <- "y"
+
+
+if (save_results == "y"){
+  
+  result_path<-paste0("C:/Users/habe/Documents/NKI_clustering/Resultat NKI skala 1-10")
+  sub_dir<-paste0("/AGNES")
+  
+  #if a folder for the PCs doesn't exist, create one.
+  dir.create(file.path(result_path, sub_dir), showWarnings = FALSE)
+  
+  
+
+  filen2<-paste0(result_path,sub_dir,"/PC",PC_x, "-PC", PC_y," ", colnames(viz_leg_AGNES[4])," ", k, " kluster, barplot.pdf")
+  
+  
+  if (file.exists(filen2)){
+    file.remove(filen2)}  
+  
+  
+  save_plot(filen2,p,ncol=2)
+}
