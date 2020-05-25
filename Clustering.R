@@ -93,7 +93,7 @@ banner("Correlation matrix", emph = TRUE)
 
 library(corrplot)
 cormat <- round(cor(raw), 2)
-corrplot(cormat, type = c("lower"), tl.cex = 0.3)
+corrplot(cormat, type = c("lower"), tl.cex = 1)
 
 banner("PCA", emph = TRUE)
 pr_out <- prcomp(raw, center = T, scale = T) #PCA step. Scaling data before PCA is usually advisable! 
@@ -142,17 +142,25 @@ PC5_axis = "PC5: Installning/kannedom"
 
 #Select number of PCs
 no_of_PCs<- 5
-PCAs<-data.frame(pr_out$x[,1:no_of_PCs])
-colnames(PCAs)<-c(PC1_axis,PC2_axis,PC3_axis, PC4_axis, PC5_axis)
+PCs<-data.frame(pr_out$x[,1:no_of_PCs])
+colnames(PCs)<-c(PC1_axis,PC2_axis,PC3_axis, PC4_axis, PC5_axis)
+
 
 # Plot biplot
 library(ggbiplot)
 customer_labels<-customer_labels_backup
-ggbiplot(pr_out, choices = c(1,2), ellipse = T, groups = as.factor(customer_labels[,7]))
+#ggbiplot(pr_out, choices = c(1,2), ellipse = T, groups = as.factor(customer_labels[,7]))
 
 # Are the variables in the wrong direction? Multiply with -1
+#pr_out_t <- pr_out
+#pr_out_t[["rotation"]] <- pr_out[["rotation"]]*-1
+#pr_out_t[["x"]] <- pr_out[["x"]]*-1
 
-pr_out$x <- (pr_out$x)*-1
+PCs=PCs*-1
+
+#apply threshold
+ 
+#ggbiplot(pr_out_t, choices = c(1,2), ellipse = T, groups = as.factor(customer_labels[,7]), varname.adjust = 2)
 
 
 banner("Clustering with K-means", emph = TRUE)
@@ -167,17 +175,17 @@ plot(1:15, predict_no_clust, type="b", xlab="Number of Clusters",
 # Determine number of clusters from scree plot. 
 # Where does the elbow occur?
 # Apply k-means with k=elbow number
-# k <- kmeans(PCAs, 12, nstart=25, iter.max=1000)
+# k <- kmeans(PCs, 12, nstart=25, iter.max=1000)
 # library(RColorBrewer)
 # library(scales)
 # palette(alpha(brewer.pal(9,'Set1'), 0.5))
-# plot(PCAs, col=k$clust, pch=16)
+#plot(PCs, col=k$clust, pch=16)
 
 # # Plot in 3D and save to disk
 # library("rgl")
 # 
 # 
-# plot3d(PCAs, col=k$clust, pch=16)
+# plot3d(PCs, col=k$clust, pch=16)
 
 # # Generates a non interactive plot called "plot"
 # snapshot3d("plot.png")
@@ -198,13 +206,13 @@ plot(1:15, predict_no_clust, type="b", xlab="Number of Clusters",
 # #Load labels
 # customer_labels = read.xlsx(file = "NKI_legends.xlsx",1)
 # 
-# plot(PCAs[,1:2], col = customer_labels[,4], pch=16)
+# plot(PCs[,1:2], col = customer_labels[,4], pch=16)
 # legend("topright",legend = unique(customer_labels[,4]),  fill = c("blue", "red") )
 # 
 # ## With ggplot
-# PCAs_t3<-cbind(PCAs_t,customer_labels[,3])
+# PCs_t3<-cbind(PCs_t,customer_labels[,3])
 # 
 # # A basic scatterplot with color depending on Species
-# ggplot(PCAs_t3[,1:2], aes(x=PCAs_t3[,1], y=PCAs_t3[,2], color=PCAs_t3[,3])) + geom_point(size=1) 
+# ggplot(PCs_t3[,1:2], aes(x=PCs_t3[,1], y=PCs_t3[,2], color=PCs_t3[,3])) + geom_point(size=1) 
 
 
