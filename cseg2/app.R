@@ -108,39 +108,32 @@ server <- function(input, output, session) {
   })
   
   
-  
-  ################## barplot
-  
-  # viz_leg <<- reactive({
-  #   
-  #   df$PC_x <-as.data.frame(PCs[,input$xcol]) 
-  #   df$PC_y <- as.data.frame(PCs[,input$ycol])
-  #   df$clusters <- as.data.frame(clusters()$cluster)
-  #   df$labels <- as.data.frame(customer_labels[,input$legend])
-  #   
-  #   return(df)
-  #   
-  #   })
-  
+##################### barplot
 
   
-
-  #PC_y <- PCs[,input$xcol] 
-  #   PCs[,input$ycol]
-  #   clusters()$cluster
-  #   customer_labels[,input$legend]
-  #   
-  #   
-  # })
+  
+  PC_x <-reactive(PCs[,input$xcol])
+  PC_y <- reactiveFileReader(PCs[,input$ycol])
+  clusters <- reactive(clusters()$cluster)
+  labels <- reactive(customer_labels[,input$legend])
   
   output$barplot1 <- renderPlot({
+  
     
-    PC_x <-PCs[,input$xcol]
-    PC_y <- PCs[,input$ycol]
-    clusters <- clusters()$cluster
-    labels <- customer_labels[,input$legend]
+    #prepare for barplot
+    counts<-as.data.frame(table(customer_labels[,input$legend], clusters()$cluster))
     
-   plot(PC_x, PC_y, col = clusters)
+    counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
+    
+    for (i in 1:nrow(counts_perc)){
+      counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
+    }
+    counts_perc<-as.data.frame(counts_perc)
+    counts_perc[,3] <- as.numeric(counts_perc[,3])
+    
+    
+    
+   plot(PC_x(), PC_y(), col = clusters)
     
     # below works:
      #plot(selectedData(), col = customer_labels[,input$legend])
@@ -149,7 +142,9 @@ server <- function(input, output, session) {
   
 
   output$table <- renderTable({
-    clusters()$cluster
+    
+
+    table(clusters())
   })
 } 
 
