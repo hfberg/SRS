@@ -54,7 +54,9 @@ ui <-pageWithSidebar(
   mainPanel(
     
     plotOutput('plot1'),
-    plotOutput("barplot1")
+    plotOutput("barplot1"),
+      tableOutput("table")
+
     
   )
   
@@ -109,36 +111,46 @@ server <- function(input, output, session) {
   
   ################## barplot
   
-  viz_leg <<- reactive({
-    
-    df$PC_x <-as.data.frame(PCs[,input$xcol]) 
-    df$PC_y <- as.data.frame(PCs[,input$ycol])
-    df$clusters <- as.data.frame(clusters()$cluster)
-    df$labels <- as.data.frame(customer_labels[,input$legend])
-    
-    return(df)
-    
-    })
+  # viz_leg <<- reactive({
+  #   
+  #   df$PC_x <-as.data.frame(PCs[,input$xcol]) 
+  #   df$PC_y <- as.data.frame(PCs[,input$ycol])
+  #   df$clusters <- as.data.frame(clusters()$cluster)
+  #   df$labels <- as.data.frame(customer_labels[,input$legend])
+  #   
+  #   return(df)
+  #   
+  #   })
   
- 
+
+  
+
+  #PC_y <- PCs[,input$xcol] 
+  #   PCs[,input$ycol]
+  #   clusters()$cluster
+  #   customer_labels[,input$legend]
+  #   
+  #   
+  # })
   
   output$barplot1 <- renderPlot({
     
-   plot(selectedData(), col = df$clusters)
+    PC_x <-PCs[,input$xcol]
+    PC_y <- PCs[,input$ycol]
+    clusters <- clusters()$cluster
+    labels <- customer_labels[,input$legend]
+    
+   plot(PC_x, PC_y, col = clusters)
     
     # below works:
-   #  plot(selectedData(), col = customer_labels[,input$legend])
+     #plot(selectedData(), col = customer_labels[,input$legend])
     
-  #viz_leg()$PC_x, viz_leg()$PC_y
     })    
-    
+  
+
+  output$table <- renderTable({
+    clusters()$cluster
+  })
 } 
-
-
-# 
-# ggplot() + geom_point(alpha = 1,size=1.5, aes(x=viz_leg()PC_x, y=viz_leg()PC_y,color = viz_leg()clusters), show.legend = T) +
-#   colScale + guides(col = guide_legend(nrow = floor(k/2))) +
-#   labs(title = "Clustering based on PC of choice",x = colnames(viz_leg[1]), y=colnames(viz_leg[2]))
-# Run the application 
 
 shinyApp(ui = ui, server = server)
