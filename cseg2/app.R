@@ -109,12 +109,9 @@ server <- function(input, output, session) {
   
   
 ##################### barplot
-
-  
-  
   PC_x <-reactive(PCs[,input$xcol])
-  PC_y <- reactiveFileReader(PCs[,input$ycol])
-  clusters <- reactive(clusters()$cluster)
+  PC_y <- reactive(PCs[,input$ycol])
+  clus <- reactive(clusters()$cluster)
   labels <- reactive(customer_labels[,input$legend])
   
   output$barplot1 <- renderPlot({
@@ -132,8 +129,10 @@ server <- function(input, output, session) {
     counts_perc[,3] <- as.numeric(counts_perc[,3])
     
     
+      
+
     
-   plot(PC_x(), PC_y(), col = clusters)
+   plot(PC_x(), PC_y(), col = clus())
     
     # below works:
      #plot(selectedData(), col = customer_labels[,input$legend])
@@ -143,8 +142,14 @@ server <- function(input, output, session) {
 
   output$table <- renderTable({
     
-
-    table(clusters())
+    counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
+    
+    for (i in 1:nrow(counts_perc)){
+      counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
+    }
+    counts_perc<-as.data.frame(counts_perc)
+    counts_perc[,3] <- as.numeric(counts_perc[,3])
+    table(counts_perc)
   })
 } 
 
