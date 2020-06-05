@@ -128,10 +128,6 @@ server <- function(input, output, session) {
   
   output$barplot1 <- renderPlot({
   
-
-
-      
-
    #works: 
   plot(PC_x(), PC_y(), col = labels(), pch = 16)
   legend(3, 5,legend = unique(labels()), fill = unique(labels()))
@@ -149,8 +145,8 @@ server <- function(input, output, session) {
     ggplot(data=counts_perc[which(counts_perc$Freq>0),], aes(x=counts_perc[which(counts_perc$Freq>0),][,2], y=counts[which(counts$Freq>0),][,3], fill=counts_perc[which(counts_perc$Freq>0),][,1])) +
       geom_bar(stat="identity", position="fill") +
       geom_text(aes(label=percent(x=counts_perc[which(counts_perc$Freq>0),][,3], accuracy = 0.1)), vjust=1.6, color="black",
-                position = position_fill(0.9), size=2) 
-      #labs(title = "Percentages of total label for each cluster",x = colnames(viz_leg[3]), y = "", fill = colnames(viz_leg[4]))
+                position = position_fill(0.9), size=2)+ 
+      labs(title = "Percentages of total label for each cluster",x = unique("Clusters"), y = "", fill = unique(labels()))
     
     #working
       #barplot(counts_perc, legend.text = unique(labels()))
