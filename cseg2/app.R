@@ -140,13 +140,20 @@ server <- function(input, output, session) {
   
   output$barplot2 <- renderPlot({
     counts_perc<-table(labels(), clus())
-
+    counts<-as.data.frame(table(labels(), clus()))
+    
       for (i in 1:nrow(counts_perc)){
          counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
       }
-
+    counts_perc <- as.data.frame(counts_perc)
+    ggplot(data=counts_perc[which(counts_perc$Freq>0),], aes(x=counts_perc[which(counts_perc$Freq>0),][,2], y=counts[which(counts$Freq>0),][,3], fill=counts_perc[which(counts_perc$Freq>0),][,1])) +
+      geom_bar(stat="identity", position="fill") +
+      geom_text(aes(label=percent(x=counts_perc[which(counts_perc$Freq>0),][,3], accuracy = 0.1)), vjust=1.6, color="black",
+                position = position_fill(0.9), size=2) 
+      #labs(title = "Percentages of total label for each cluster",x = colnames(viz_leg[3]), y = "", fill = colnames(viz_leg[4]))
     
-      barplot(counts_perc, legend.text = unique(labels()))
+    #working
+      #barplot(counts_perc, legend.text = unique(labels()))
     
   })
   
