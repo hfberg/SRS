@@ -16,6 +16,7 @@
 
 library(shiny)
 library(xlsx)
+library(scales)
 
 
 
@@ -56,7 +57,8 @@ ui <-pageWithSidebar(
     
     plotOutput('plot1'),
     plotOutput("barplot1"),
-      tableOutput("table")
+    tableOutput("table"),
+    plotOutput("barplot2")
 
     
   )
@@ -126,36 +128,41 @@ server <- function(input, output, session) {
   
   output$barplot1 <- renderPlot({
   
-    # 
-    # #prepare for barplot
-    # counts<-as.data.frame(table(customer_labels[,input$legend], clusters()$cluster))
-    # 
-    # counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
-    # 
-    # for (i in 1:nrow(counts_perc())){
-    #   counts_perc()[i,]<-round(counts_perc()[i,]/sum(counts_perc()[i,]),3)
-    # }
-    # counts_perc()<-as.data.frame(counts_perc())
-    # counts_perc()[,3] <- as.numeric(counts_perc()[,3])
-    
-    
+
+
       
 
+   #works: 
+  plot(PC_x(), PC_y(), col = labels(), pch = 16)
+  legend(3, 5,legend = unique(labels()), fill = unique(labels()))
     
-   plot(PC_x(), PC_y(), col = labels(), pch = 16)
-    legend(3, 5,legend = unique(labels()), fill = unique(labels()))
+    })  
+  
+  output$barplot2 <- renderPlot({
+    counts_perc<-table(labels(), clus())
+
+      for (i in 1:nrow(counts_perc)){
+         counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
+      }
+
     
-    # below works:
-     #plot(selectedData(), col = customer_labels[,input$legend])
+      barplot(counts_perc, legend.text = unique(labels()))
     
-    })    
+  })
   
 
-  output$table <- renderTable({
-    
-   
-   # table(counts_perc())
-  })
+  # output$table <- renderTable({
+  #   
+  #   counts_perc<-table(labels(), clus())
+  # 
+  #   for (i in 1:nrow(counts_perc)){
+  #      counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
+  #   }
+  # 
+  #   counts_perc
+  #   
+  #   
+  # })
 } 
 
 shinyApp(ui = ui, server = server)
