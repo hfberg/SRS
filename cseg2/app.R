@@ -27,9 +27,10 @@ library(xlsx)
 
 # a categorical variable
 
-vars <- names(PCs)
+
 PCs <-  read.xlsx("PCs.xlsx",1)
-PCs[,1]<- NULL
+vars <- names(PCs)
+#PCs[,1]<- NULL
 customer_labels <- read.xlsx("customer_labels.xlsx", 1)
 
 
@@ -114,25 +115,35 @@ server <- function(input, output, session) {
   clus <- reactive(clusters()$cluster)
   labels <- reactive(customer_labels[,input$legend])
   
+  #counts_perc<-reactive((table(customer_labels[,input$legend], clusters()$cluster)))
+  
+  #for (i in 1:nrow(counts_perc())){
+  #  counts_perc()[i,]<-round(counts_perc()[i,]/sum(counts_perc()[i,]),3)
+  #}
+  
+  #counts_perc<-as.data.frame(counts_perc())
+  #counts_perc[,3] <- as.numeric(counts_perc()[,3])
+  
   output$barplot1 <- renderPlot({
   
-    
-    #prepare for barplot
-    counts<-as.data.frame(table(customer_labels[,input$legend], clusters()$cluster))
-    
-    counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
-    
-    for (i in 1:nrow(counts_perc)){
-      counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
-    }
-    counts_perc<-as.data.frame(counts_perc)
-    counts_perc[,3] <- as.numeric(counts_perc[,3])
+    # 
+    # #prepare for barplot
+    # counts<-as.data.frame(table(customer_labels[,input$legend], clusters()$cluster))
+    # 
+    # counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
+    # 
+    # for (i in 1:nrow(counts_perc())){
+    #   counts_perc()[i,]<-round(counts_perc()[i,]/sum(counts_perc()[i,]),3)
+    # }
+    # counts_perc()<-as.data.frame(counts_perc())
+    # counts_perc()[,3] <- as.numeric(counts_perc()[,3])
     
     
       
 
     
-   plot(PC_x(), PC_y(), col = clus())
+   plot(PC_x(), PC_y(), col = labels(), pch = 16)
+    legend(3, 5,legend = unique(labels()), fill = unique(labels()))
     
     # below works:
      #plot(selectedData(), col = customer_labels[,input$legend])
@@ -142,14 +153,8 @@ server <- function(input, output, session) {
 
   output$table <- renderTable({
     
-    counts_perc<-(table(customer_labels[,input$legend], clusters()$cluster))
-    
-    for (i in 1:nrow(counts_perc)){
-      counts_perc[i,]<-round(counts_perc[i,]/sum(counts_perc[i,]),3)
-    }
-    counts_perc<-as.data.frame(counts_perc)
-    counts_perc[,3] <- as.numeric(counts_perc[,3])
-    table(counts_perc)
+   
+   # table(counts_perc())
   })
 } 
 
