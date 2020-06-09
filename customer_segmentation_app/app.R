@@ -20,6 +20,7 @@ library(scales)
 library(RColorBrewer)
 library(ggplot2)
 library(ggnewscale)
+library(stringr)
 
 
 # Define UI for application that draws a histogram
@@ -33,9 +34,15 @@ library(ggnewscale)
 
 PCs <- xlsx::read.xlsx("PCs.xlsx",1)
 #PCs[,1]<- NULL
+names(PCs) <- str_replace_all(names(PCs), pattern = "[.]", replacement = " ")
+vars <- names(PCs)
+
 customer_labels <- xlsx::read.xlsx("customer_labels.xlsx", 1)
 customer_labels[,1] <- NULL
-vars <- names(PCs)
+names(customer_labels) <- str_replace_all(names(customer_labels), pattern = "[.]", replacement = " ")
+for (i in 1:ncol(customer_labels)){
+  customer_labels[,i] <- as.factor(customer_labels[,i])
+}
 
 
 
@@ -101,7 +108,7 @@ server <- function(input, output, session) {
   #pie(rep(1,n), col=sample(col_vector, n))
   
   output$text <- renderText({
-  # prit stuff here for easier visualization and error search.
+  "test" # prit stuff here for easier visualization and error search.
   })
 
   
@@ -135,8 +142,11 @@ server <- function(input, output, session) {
 
   output$barplot1 <- renderPlot({
   
+    names(col_vector)<-levels(clus())
+    colScale <- scale_colour_manual(name = "Clusters",values = col_vector)
+    
     ggplot() + geom_point(alpha = 1,size=1.5, aes(x=PC_x(), y=PC_y(),color = as.factor(clus())), show.legend = T) +
-     # colScale + 
+     colScale + 
       labs(title = "Clustering based on PC of choice",x = PC_x_label(), y=PC_y_label(), color = "Clusters") +
       theme(panel.background = element_rect(fill = "white", color = "black"))
     
