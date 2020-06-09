@@ -82,31 +82,31 @@ server <- function(input, output, session) {
 ################# Generate output
   
   output$text <- renderText({
- # prit stuff here for easier visualization and error search.
+# Print stuff here for easier visualization and error search.
   })
 
 
 # Plot legends with clusters circled
   output$plot1 <- renderPlot({
     
-    # Preparation
+  # Preparation
     names(col_vector)<-levels(clus())
     colScale <- scale_colour_manual(name = "Clusters",values = col_vector)
      
-    # Plot
+  # Plot
     ggplot() +
        
-       # scatter plot
+     # scatter plot
        geom_point(alpha = 1,size=1.5, aes(x=PC_x(), y=PC_y(),color = labels())) +
        labs(color=colnames(labels())) + theme(legend.key.size =  unit(0.1, "in"))+
        
-       # reset color scale
+     # reset color scale
        new_scale_color() +
        
-       #plot ellipses
+     #plot ellipses
        stat_ellipse(aes(x = PC_x(), y= PC_y(), color = as.factor(clus()))) + colScale +
        
-       # set labels and themes
+     # set labels and themes
        labs(title = "Clusters and label of choice plotted",x = PC_x_label(), y=PC_y_label())+
        theme(panel.background = element_rect(fill = "white", color = "black"))
    })
@@ -122,13 +122,13 @@ server <- function(input, output, session) {
   #Plot  
     ggplot() +
       
-      # scatter plot
+    # scatter plot
       geom_point(aes(x=PC_x(), y=PC_y(),color = as.factor(clus())), alpha = 1, size=1.5, show.legend = T) +
      
-      # set color
+    # set color
       colScale + 
       
-      #set labels and themes
+    # set labels and themes
       labs(title = "Clustering based on PC of choice",x = PC_x_label(), y=PC_y_label(), color = "Clusters") +
       theme(panel.background = element_rect(fill = "white", color = "black"))
     })  
@@ -137,7 +137,7 @@ server <- function(input, output, session) {
 # Plot barplot
   output$barplot <- renderPlot({
     
-    # Preparation
+  # Preparation
     counts_perc<-table(labels(), clus())
     counts<-as.data.frame(table(labels(), clus()))
     
@@ -147,20 +147,20 @@ server <- function(input, output, session) {
     
     counts_perc <- as.data.frame(counts_perc)
     
-    # Plot
+  # Plot
     ggplot(data=counts_perc[which(counts_perc$Freq>0),], aes(x=counts_perc[which(counts_perc$Freq>0),][,2], y=counts[which(counts$Freq>0),][,3], fill=counts_perc[which(counts_perc$Freq>0),][,1])) +
       geom_bar(stat="identity", position="fill") +
       
-      # Plot percentages on bars
+    # Plot percentages on bars
       geom_text(aes(label=percent(x=counts_perc[which(counts_perc$Freq>0),][,3], accuracy = 0.1)), vjust=1.6, color="black",
       position = position_fill(0.9), size=2)+
       
-      # Plot labels and themes
+    # Plot labels and themes
       labs(title = "Percentages of total label for each cluster",x = unique("Clusters"), y = "", fill = n_labels())+
       theme(panel.background = element_rect(fill = "white"))
   })
   
 } 
 
-# Run app
+################################################# Run app
 shinyApp(ui = ui, server = server)
