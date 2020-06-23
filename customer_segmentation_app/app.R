@@ -9,6 +9,7 @@ library(RColorBrewer)
 library(ggplot2)
 library(ggnewscale)
 library(stringr)
+#library(mclust)
 
 # Load and shape PC data
 PCs <- xlsx::read.xlsx("PCs.xlsx",1)
@@ -18,6 +19,7 @@ vars <- names(PCs)
 # Load and shape legends data
 customer_labels <- xlsx::read.xlsx("customer_labels.xlsx", 1)
 names(customer_labels) <- str_replace_all(names(customer_labels), pattern = "[.]", replacement = " ")
+#customer_labels <- mapply()
 for (i in 1:ncol(customer_labels)){
   customer_labels[,i] <- as.factor(customer_labels[,i])
 }
@@ -32,8 +34,10 @@ ui <-pageWithSidebar(
     selectInput('xcol', 'X Variable', names(PCs)),
     selectInput('ycol', 'Y Variable', names(PCs), selected = names(PCs)[[2]]),
     sliderInput("clusters", "Number of clusters:", min = 1, max = 30, value = 3),
-    selectInput('legend', 'Choose Legend', names(customer_labels), selected = names(customer_labels)[[6]])
-    
+    selectInput('legend', 'Choose Legend', names(customer_labels), selected = names(customer_labels)[[6]]),
+    #selectInput("clus_algorithm", "Choose clustering algorith", c("k-means", "GMM"), selected = "k-means"),
+    # Button
+    downloadButton("downloadData", "Download current dataset")
   ),
 
   mainPanel(
@@ -60,19 +64,45 @@ server <- function(input, output, session) {
   PC_y <- reactive(PCs[,input$ycol])
   PC_y_label <- reactive(input$ycol)
 
+  # Clustering on selected axes and save to variable
+  
+  clus_algoritm <- reactive(input$clus_algorithm)
+  
+  ########################################## choose clustering algoritm
+  # clus <- reactive({
+  #   if (input$clus_algorithm == "k-means"){
+  #     clusters <- reactive({
+  #       
+  #       kmeans(c(PCs[,input$xcol], PCs[,input$ycol]), input$clusters)
+  #       
+  #     })
+  #     reactive(clusters()$cluster)
+  #   } else if (input$clus_algoritm == "GMM"){
+  #     
+  #     mcl.model <- reactive(Mclust(c(PCs[,input$xcol], PCs[,input$ycol])))
+  #     reactive(mcl.model()$classification)
+  #   }
+  #   
+  #   
+  # })
+  
+  #############################################################
+  
+  
 # Clustering on selected axes and save to variable
   clusters <- reactive({
-    
+
     x = data.frame(PC_x(), PC_y())
     kmeans(x, input$clusters)
-    
+
   })
 
   clus <- reactive(clusters()$cluster)
-  
+
+ 
 # Create legend variables
   labels <- reactive(customer_labels[,input$legend])
-  n_labels <- reactive(names(customer_labels[,input$legend]))
+  n_labels <- reactive(names(customer_labels[input$legend]))
 
 # create our own color chart  
   n <- 30
@@ -83,7 +113,8 @@ server <- function(input, output, session) {
   
   output$text <- renderText({
 # Print stuff here for easier visualization and error search.
-  })
+    
+   })
 
 
 # Plot legends with clusters circled
@@ -156,9 +187,29 @@ server <- function(input, output, session) {
       position = position_fill(0.9), size=2)+
       
     # Plot labels and themes
-      labs(title = "Percentages of total label for each cluster",x = unique("Clusters"), y = "", fill = n_labels())+
+      labs(title = "Percentages of total label for each cluster",x = "Clusters", y = "", fill = n_labels())+
       theme(panel.background = element_rect(fill = "white"))
   })
+  
+  
+#Generate dataset to be downloaded
+  
+  dataset <- reactive({
+    n_clus <- paste0("Kluster 1:", length(unique(clus())))
+    n_dataset <- c(PC_x_label(), PC_y_label(), n_clus, n_labels())
+    x = data.frame(PC_x = PC_x(), PC_y = PC_y(), clusters = clus(), label = labels())
+    setNames(x,n_dataset)
+  })
+
+
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("current dataset.xlsx", sep = "")
+    },
+    content = function(file) {
+      xlsx::write.xlsx(dataset(), file, row.names = FALSE)
+    }
+  )
   
 } 
 
